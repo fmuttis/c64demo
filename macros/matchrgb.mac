@@ -1,0 +1,61 @@
+/*
+Match RGB colors with the C64 palette
+
+By Pantaloon/FLT.
+
+Here is some code to find the closest c-64 color index from an RGB value, useful when doing image conversion. There are of course better ways to find the best match but this works ok if you have images with c-64 colors already. I use it for my kickasm image converters.
+
+*/
+	.struct RGB {r,g,b}
+	
+	.var s_palette = List().add(
+			RGB(0,0,0),		// black 0
+			RGB(255,255,255),	// white 1
+			RGB(104,55,43),		// red 2
+			RGB(131,240,220),	// cyan 3
+			RGB(111,61,134),	// purple 4
+			RGB(89,205,54),		// green 5
+			RGB(65,55,205),		// blue 6
+			RGB(184,199,111),	// yellow 7
+			RGB(209,127,48),	// orange 8
+			RGB(67,57,0),		// brown 9	
+			RGB(154,103,89),	// light_red 10
+			RGB(91,91,91),		// dark_gray 11
+			RGB(142,142,142),	// gray 12
+			RGB(157,255,157),	// light_green 13
+			RGB(117,161,236),	// light_blue 14
+			RGB(193,193,193)	// light_gray 15
+			);
+	
+	.function colorDistance(c1,c2)
+	{
+		.var cr = c1.r-c2.r
+		.var cg = c1.g-c2.g
+		.var cb = c1.b-c2.b
+		.return sqrt([cr*cr] + [cg*cg] + [cb*cb])
+	}
+
+	.function getClosestColorIndex(rgb)
+	{
+		.return getClosestColorIndex(
+			rgb, s_palette
+			)
+	}
+
+	.function getClosestColorIndex(rgb, palette)
+	{
+		.var distance = colorDistance(rgb, palette.get(0))
+		.var closestColorIndex = 0
+
+		.for (var index = 1; index < palette.size(); index++)
+		{
+			.var d = colorDistance(rgb, palette.get(index))
+			.if (d < distance)
+			{
+				.eval distance = d
+				.eval closestColorIndex = index
+			}
+		}
+
+		.return closestColorIndex
+	}

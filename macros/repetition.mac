@@ -1,0 +1,37 @@
+/*
+how to use:
+:lsr #3  // divide by 8
+:nop #8  // Do 8 nops
+*/
+//---------------------------------
+// repetition commands 
+//---------------------------------
+.macro ensureImmediateArgument(arg) {
+	.if (arg.getType()!=AT_IMMEDIATE)	.error "The argument must be immediate!" 
+}
+.pseudocommand asl x {
+	:ensureImmediateArgument(x)
+	.for (var i=0; i<x.getValue(); i++) asl
+}
+.pseudocommand lsr x {
+	:ensureImmediateArgument(x)
+	.for (var i=0; i<x.getValue(); i++) lsr
+}
+.pseudocommand rol x {
+	:ensureImmediateArgument(x)
+	.for (var i=0; i<x.getValue(); i++) rol
+}
+.pseudocommand ror x {
+	:ensureImmediateArgument(x)
+	.for (var i=0; i<x.getValue(); i++) ror
+}
+
+.pseudocommand pla x {
+	:ensureImmediateArgument(x)
+	.for (var i=0; i<x.getValue(); i++) pla
+}
+
+.pseudocommand nop x {
+	:ensureImmediateArgument(x)
+	.for (var i=0; i<x.getValue(); i++) nop
+}

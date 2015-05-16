@@ -1,0 +1,47 @@
+/*Pseudocommands for 16 bit operations
+
+The following pseudocommands uses the function _16bit_nextArgument(arg), and it must be declared previously:
+*/
+
+// increment 16 bit variable
+
+.function _16bit_nextArgument(arg) {
+	.if (arg.getType()==AT_IMMEDIATE)
+	.return CmdArgument(arg.getType(),>arg.getValue())
+	.return CmdArgument(arg.getType(),arg.getValue()+1)
+}
+.pseudocommand inc16 arg {
+		inc arg
+	        bne over
+		inc _16bit_nextArgument(arg)
+over:
+}
+
+// decrement 16 bit variable
+.pseudocommand dec16 arg {
+		lda arg
+       	        bne skip
+                dec _16bit_nextArgument(arg) 
+skip:   	dec arg
+}
+
+// Move or Load 16 bit values from/to 16 bit variables:
+.pseudocommand mov16 src;tar {
+		lda src
+		sta tar
+		lda _16bit_nextArgument(src)
+		sta _16bit_nextArgument(tar)
+}
+
+// Addition of 16 bits variables:
+
+.pseudocommand add16 arg1 ; arg2 ; tar {
+.if (tar.getType()==AT_NONE) .eval tar=arg1
+		lda arg1
+         	adc arg2
+        	sta tar
+        	lda _16bit_nextArgument(arg1)
+		adc _16bit_nextArgument(arg2)
+		sta _16bit_nextArgument(tar)
+}
+

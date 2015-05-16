@@ -1,0 +1,179 @@
+.importonce
+.print "Scroller imported once..."
+
+.macro scrollerCode(line){
+;---------------------------------------
+;scroller v1 (w) gpz of hitmen
+;---------------------------------------
+;features : unlimited text-length
+;           (end with $00)
+;
+;           8 different speeds
+;           (select with $f8 to $ff)
+;
+;           ascii-text (enter in the
+;           source-code !)
+;
+;           forward & backward-scroll !
+;           (select with $f1/$f0)
+;---------------------------------------
+;$d016-val.  : in scrpos
+;scroll-init : jsr scrinit
+;irq-drive   : jsr scroll
+;---------------------------------------
+
+scrinit  lda #>scrtxt   ; textstart
+         sta txtpos+2
+         lda #<scrtxt
+         sta txtpos+1
+         lda #$01       ; speed 1
+         sta fscrspd+1
+         sta bscrspd+1
+         lda #$07
+         sta scrpos
+         lda #$01       ; forward
+         sta scrdir
+         rts
+
+
+scroll   lda scrdir
+         cmp #$01       ; forward ?
+         bne backward   ; no !
+
+forward  lda scrpos
+         sec
+fscrspd  sbc #$01
+         and #$07
+         sta scrpos
+         bcc fver
+         rts
+
+fver     ldx #$00
+flp1     lda line+1,x
+         sta line,x
+         inx
+         cpx #$27
+         bne flp1
+
+         jmp txtpos
+
+backward lda scrpos
+         and #$07
+         clc
+bscrspd  adc #$01
+         tax
+         and #$07
+         sta scrpos
+         txa
+         adc #$f8
+         bcs bver
+         rts
+
+bver     ldx #$26
+blp1     lda line,x
+         sta line+1,x
+         dex
+         cpx #$ff
+         bne blp1
+
+txtpos   lda $dead      ;
+         cmp #$00       ; end of txt ?
+         bne lp2        ; no !
+
+         lda #>scrtxt
+         sta txtpos+2
+         lda #<scrtxt
+         sta txtpos+1
+         jmp txtpos
+
+lp2      cmp #$f8       ; speedbyte ?
+         bcc lp4        ; no !
+         and #$07
+         clc
+         adc #$01
+         sta fscrspd+1
+         sta bscrspd+1
+         jmp txtcount
+
+lp4      cmp #$f1          ; dir. forw ?
+         bcc lp6           ; no !
+         ldx #$01
+         stx scrdir
+         jmp txtcount
+
+lp6      cmp #$f0          ; dir. back ?
+         bcc lp5           ; no !
+         ldx #$00
+         stx scrdir
+         jmp txtcount
+
+lp5      ldx scrdir
+         cpx #$01          ; forward ?
+         bne back          ; no !
+
+         and #$3f
+         sta line+$27
+         lda scrpos
+         clc
+         adc #$08
+         and #$07
+         sta scrpos
+         jmp txtcount
+
+back     and #$3f
+         sta line
+         lda scrpos
+         sec
+         sbc #$08
+         and #$07
+         sta scrpos
+
+txtcount inc txtpos+1
+         bne lp3
+         inc txtpos+2
+lp3
+
+ende     rts
+
+scrdir   .byte $01
+scrpos   .byte $07
+
+
+scrtxt
+
+         .byte $f1,$f8
+         .text "speed 1                "
+         .byte $f9
+         .text "speed 2                "
+         .byte $fa
+         .text "speed 3                "
+         .byte $fb
+         .text "speed 4                "
+         .byte $fc
+         .text "speed 5                "
+         .byte $fd
+         .text "speed 6                "
+         .byte $fe
+         .text "speed 7                "
+         .byte $ff
+         .text "speed 8                "
+
+         .byte $f0,$f8
+         .text "1 deeps                "
+         .byte $f9
+         .text "2 deeps                "
+         .byte $fa
+         .text "3 deeps                "
+         .byte $fb
+         .text "4 deeps                "
+         .byte $fc
+         .text "5 deeps                "
+         .byte $fd
+         .text "6 deeps                "
+         .byte $fe
+         .text "7 deeps                "
+         .byte $ff
+         .text "8 deeps                "
+
+         .byte $00
+}
