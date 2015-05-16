@@ -1,0 +1,12 @@
+rasterbar dream series #1 : horisontal raster lines
+by mr. rasterblaster
+
+welcome to the first of the rasterbar dream series.
+as my knowledge of c64-assembler, the vic-chip and
+the 6502 grows stronger, many of these rasterbar-
+effects will improve.
+
+upcoming project:
+16x vertical rasterbars using only the $d020.
+
+15.04.2010
